@@ -12,9 +12,9 @@ jobs:
           python-version: '3.8'
       - run: pip install bandit codespell flake8
       - run: bandit --recursive --skip B101,B110,B311 .
-      # See setup.cfg for the default settings for codespell and flake8
       - run: codespell
       - run: flake8
+
   test:
     strategy:
       fail-fast: false
@@ -22,23 +22,39 @@ jobs:
         include:
           # Test supported ROS 2 distributions
           # https://docs.ros.org/en/rolling/Releases.html
-          - ros_distribution: foxy
-            os: ubuntu-20.04
-          - ros_distribution: galactic
-            os: ubuntu-20.04
+          - ros: foxy
+            ubuntu: 20.04
+          - ros: galactic
+            ubuntu: 20.04
 
-    name: ROS 2 ${{ matrix.ros_distribution }} (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    name: ROS 2 ${{ matrix.ros }} (${{ matrix.ubuntu }})
+    runs-on: ubuntu-${{ matrix.ubuntu }}
 
     steps:
       - uses: actions/checkout@v2
         with:
           path: ros_ws/src
 
-      - uses: ros-tooling/setup-ros@v0.2
-        with:
-          required-ros-distributions: ${{ matrix.ros_distribution }}
+      # Install bare minimum dependencies to run ros-tooling/action-ros-ci
+      # All build and test dependencies should live in package.xml files
+      - name: Install CI dependencies
+        run: |
+          set -euxo pipefail
+          sudo bash -c 'echo "deb http://packages.ros.org/ros2/ubuntu focal main" > /etc/apt/sources.list.d/ros2-latest.list'
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake \
+            git \
+            lcov \
+            python3-colcon-common-extensions \
+            python3-colcon-coveragepy-result \
+            python3-colcon-lcov-result \
+            python3-colcon-mixin \
+            python3-rosdep \
+            python3-vcstool
+          sudo rosdep init
 
       - uses: ros-tooling/action-ros-ci@v0.2
         with:
-          target-ros2-distro: ${{ matrix.ros_distribution }}
+          target-ros2-distro: ${{ matrix.ros }}
