@@ -30,7 +30,7 @@ jobs:
     name: ROS 2 ${{ matrix.ros }} (${{ matrix.ubuntu }})
     runs-on: ubuntu-20.04
     container:
-      image: ros:${{ matrix.ros }}-ros-base-${{ matrix.ubuntu }}
+      image: osrf/ros2:testing
 
     steps:
       - uses: actions/checkout@v2
