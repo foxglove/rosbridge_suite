@@ -40,7 +40,6 @@
 
   <test_depend>ament_cmake_pytest</test_depend>
   <test_depend>sensor_msgs</test_depend>
-  <test_depend>shape_msgs</test_depend>
   <test_depend>geometry_msgs</test_depend>
   <test_depend>rmw_dds_common</test_depend>
 
